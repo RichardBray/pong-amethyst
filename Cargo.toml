@@ -1,0 +1,13 @@
+[package]
+name = "pong-amethyst"
+version = "0.1.0"
+authors = ["Richard Bray <richardbray89@gmail.com>"]
+edition = "2018"
+
+
+[dependencies]
+amethyst = {version = "0.15.2", features = ["no-slow-safety-checks"]}
+
+[features]
+default = ["metal"]
+

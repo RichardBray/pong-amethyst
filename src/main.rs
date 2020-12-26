@@ -7,6 +7,7 @@ use amethyst::{
     },
     utils::application_root_dir,
 };
+use amethyst::core::transform::TransformBundle;
 
 mod pong;
 
@@ -32,7 +33,8 @@ fn main() -> amethyst::Result<()> {
             )
             // RenderFlat2D plugin is used to render entities with a `SpriteRender` component.
             .with_plugin(RenderFlat2D::default()),
-    )?;
+    )?
+    .with_bundle(TransformBundle::new())?;
 
     let mut game = Application::new(assets_dir, Pong, game_data)?;
     game.run();

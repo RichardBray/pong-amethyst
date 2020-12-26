@@ -53,6 +53,7 @@ fn initialise_paddles(world: &mut World, sprite_sheet_handle: Handle<SpriteSheet
   // Create a left plank entity
   world
     .create_entity()
+    .with(sprite_render.clone())
     .with(Paddle::new(Side::Left))
     .with(left_transform)
     .build();
@@ -60,6 +61,7 @@ fn initialise_paddles(world: &mut World, sprite_sheet_handle: Handle<SpriteSheet
   // Create right plank entity.
   world
     .create_entity()
+    .with(sprite_render)
     .with(Paddle::new(Side::Right))
     .with(right_transform)
     .build();    
@@ -105,8 +107,11 @@ impl SimpleState for Pong {
   fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
     let world = data.world;
 
+    // Load the spritesheet necessary to render the graphics.
+    let sprite_sheet_handle = load_sprite_sheet(world);    
+
     world.register::<Paddle>();
-    initialise_paddles(world);
+    initialise_paddles(world, sprite_sheet_handle);
     initialise_camera(world);
   }
 }

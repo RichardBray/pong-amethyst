@@ -10,6 +10,9 @@ pub const ARENA_HEIGHT: f32 = 100.0;
 pub const ARENA_WIDTH: f32 = 100.0;
 pub const PADDLE_HEIGHT: f32 = 16.0;
 pub const PADDLE_WIDTH: f32 = 4.0;
+pub const BALL_VELOCITY_X: f32 = 75.0;
+pub const BALL_VELOCITY_Y: f32 = 50.0;
+pub const BALL_RADIUS: f32 = 2.0;
 
 pub enum Side {
   Left,
@@ -22,6 +25,11 @@ pub struct Paddle {
   pub side: Side,
   pub width: f32,
   pub height: f32,
+}
+
+pub struct Ball {
+  pub velocity: [f32; 2],
+  pub radius: f32,
 }
 
 fn initialise_camera(world: &mut World) {
@@ -67,6 +75,26 @@ fn initialise_paddles(world: &mut World, sprite_sheet_handle: Handle<SpriteSheet
     .build();    
 }
 
+/// Initialises one ball in the middle-ish of the arena.
+fn initialise_ball(world: &mut World, sprite_sheet_handle: Handle<SpriteSheet>) {
+  // Create the translation.
+  let mut local_transform = Transform::default();
+  local_transform.set_translation_xyz(ARENA_WIDTH / 2.0, ARENA_HEIGHT / 2.0, 0.0);
+
+  // Assign the sprite for the ball. The ball is the second sprite in the sheet.
+  let sprite_render = SpriteRender::new(sprite_sheet_handle, 1);
+
+  world
+      .create_entity()
+      .with(sprite_render)
+      .with(Ball {
+          radius: BALL_RADIUS,
+          velocity: [BALL_VELOCITY_X, BALL_VELOCITY_Y],
+      })
+      .with(local_transform)
+      .build();
+}
+
 fn load_sprite_sheet(world: &mut World) -> Handle<SpriteSheet> {
   let texture_handle = {
     let loader = world.read_resource::<Loader>();
@@ -103,14 +131,20 @@ impl Component for Paddle {
   type Storage = DenseVecStorage<Self>;
 }
 
+impl Component for Ball {
+  type Storage = DenseVecStorage<Self>;
+}
+
 impl SimpleState for Pong {
   fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
     let world = data.world;
 
     // Load the spritesheet necessary to render the graphics.
-    let sprite_sheet_handle = load_sprite_sheet(world);    
+    let sprite_sheet_handle = load_sprite_sheet(world);   
+    
+    world.register::<Ball>(); // <- add this line temporarily
 
-    world.register::<Paddle>();
+    initialise_ball(world, sprite_sheet_handle.clone()); // <- add this line
     initialise_paddles(world, sprite_sheet_handle);
     initialise_camera(world);
   }

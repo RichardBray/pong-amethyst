@@ -6,6 +6,7 @@ use amethyst::{
         RenderingBundle,
     },
     utils::application_root_dir,
+    ui::{RenderUi, UiBundle},
     core::transform::TransformBundle,
     input::{InputBundle, StringBindings},
 };
@@ -37,13 +38,22 @@ fn main() -> amethyst::Result<()> {
                     .with_clear([0.0, 0.0, 0.0, 1.0]), // Background colourin RGBA
             )
             // RenderFlat2D plugin is used to render entities with a `SpriteRender` component.
-            .with_plugin(RenderFlat2D::default()),
+            .with_plugin(RenderFlat2D::default())
+            .with_plugin(RenderUi::default()),
     )?
     .with_bundle(TransformBundle::new())?
     .with_bundle(input_bundle)?
-    .with(systems::PaddleSystem, "paddle_system", &["input_system"]);
+    .with_bundle(UiBundle::<StringBindings>::new())?
+    .with(systems::PaddleSystem, "paddle_system", &["input_system"])
+    .with(systems::MoveBallsSystem, "ball_system", &[])
+    .with(
+        systems::BounceSystem,
+        "collision_system",
+        &["paddle_system", "ball_system"],
+    )
+    .with(systems::WinnerSystem, "winner_system", &["ball_system"]);
 
-    let mut game = Application::new(assets_dir, Pong, game_data)?;
+    let mut game = Application::new(assets_dir, Pong::default(), game_data)?;
     game.run();
 
     Ok(())
